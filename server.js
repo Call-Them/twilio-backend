@@ -6,7 +6,7 @@ const twilio = require("twilio");
 const app = express();
 app.use(cors());
 app.use(express.json());
-
+app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
 const AccessToken = twilio.jwt.AccessToken;
@@ -34,11 +34,20 @@ app.get("/token", (req, res) => {
 
 /* VOICE ROUTE */
 app.post("/voice", (req, res) => {
-  const VoiceResponse = twilio.twiml.VoiceResponse;
+
+  const VoiceResponse = require("twilio").twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  const number = req.body.To;
-  twiml.dial(number);
+  const dial = twiml.dial({
+    callerId: process.env.TWILIO_PHONE_NUMBER,
+    timeout: 20
+  });
+
+  // Your phone (US)
+  dial.number("+19413828380");
+
+  // Friend in Colombia
+  dial.number("+573197753531");
 
   res.type("text/xml");
   res.send(twiml.toString());
