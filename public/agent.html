@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Agent Panel</title>
-  <script src="https://media.twiliocdn.com/sdk/js/voice/latest/twilio.min.js"></script>
+  <title>Agent Login</title>
+  <script src="/twilio.min.js"></script>
 </head>
 <body>
 
-<h2>Agent Login</h2>
+  <h1>Agent Login</h1>
 
-<select id="identity">
-  <option value="diego">Diego</option>
-  <option value="colombia">Colombia</option>
-</select>
+  <select id="identity">
+    <option value="diego">Diego</option>
+    <option value="colombia">Colombia</option>
+  </select>
 
-<button id="goOnline">Go Online</button>
+  <button id="goOnline">Go Online</button>
 
-<p id="status">Offline</p>
+  <p id="status">Offline</p>
 
-<script>
-let device;
+  <script>
+    let device;
 
-document.getElementById("goOnline").addEventListener("click", async () => {
+    document.getElementById("goOnline").addEventListener("click", async () => {
+      try {
+        const identity = document.getElementById("identity").value;
+        console.log("Requesting token for:", identity);
 
-  try {
-    const identity = document.getElementById("identity").value;
-    console.log("Requesting token for:", identity);
+        const response = await fetch(`/token?identity=${identity}`);
+        const data = await response.json();
 
-    const response = await fetch(`https://twilio-backend-ncbh.onrender.com/token?identity=${identity}`);
-    const data = await response.json();
+        device = new Twilio.Device(data.token, {
+          logLevel: 1
+        });
 
-    device = new Twilio.Device(data.token);
+        device.on("registered", () => {
+          console.log("Registered");
+          document.getElementById("status").innerText = identity + " is ONLINE";
+        });
 
-    device.on("registered", () => {
-      console.log("Registered");
-      document.getElementById("status").innerText = identity + " is ONLINE";
+        device.on("error", error => {
+          console.error("Twilio error:", error);
+        });
+
+        device.on("incoming", call => {
+          console.log("Incoming call");
+          call.accept();
+        });
+
+        // 🔥 REQUIRED IN SDK v2
+        device.register();
+
+      } catch (err) {
+        console.error("Setup error:", err);
+      }
     });
-
-    device.on("error", error => {
-      console.error("Twilio error:", error);
-    });
-
-    device.on("incoming", call => {
-      console.log("Incoming call");
-      call.accept();
-    });
-
-  } catch (err) {
-    console.error("Setup error:", err);
-  }
-
-});
-</script>
+  </script>
 
 </body>
 </html>
