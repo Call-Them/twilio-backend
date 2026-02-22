@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Agent Dashboard</title>
-  <script src="/twilio.min.js"></script>
+  <title>Agent Panel</title>
+  <script src="https://sdk.twilio.com/js/voice/latest/twilio.min.js"></script>
 </head>
-<body style="font-family: Arial; padding: 40px;">
+<body>
 
 <h2>Agent Login</h2>
 
@@ -13,43 +13,31 @@
   <option value="colombia">Colombia</option>
 </select>
 
-<button onclick="goOnline()">Go Online</button>
+<button id="goOnline">Go Online</button>
 
-<p id="status"></p>
+<p id="status">Offline</p>
 
 <script>
 let device;
 
-async function goOnline() {
+document.getElementById("goOnline").addEventListener("click", async () => {
 
   const identity = document.getElementById("identity").value;
 
-  const response = await fetch("/token?identity=" + identity);
+  const response = await fetch(`https://twilio-backend-ncbh.onrender.com/token?identity=${identity}`);
   const data = await response.json();
 
   device = new Twilio.Device(data.token);
 
-  device.on("registered", () => {
-    document.getElementById("status").innerText =
-      identity + " is ONLINE";
+  device.on("ready", () => {
+    document.getElementById("status").innerText = identity + " is ONLINE";
   });
 
   device.on("incoming", call => {
-
-    if (confirm("Incoming website call. Accept?")) {
-      call.accept();
-    } else {
-      call.reject();
-    }
-
+    call.accept();
   });
 
-  device.on("error", err => {
-    console.error(err);
-  });
-
-  device.register();
-}
+});
 </script>
 
 </body>

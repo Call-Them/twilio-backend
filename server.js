@@ -41,8 +41,8 @@ app.post("/voice", (req, res) => {
 
   const dial = twiml.dial();
 
-  dial.client("Diego");
-  dial.client("Colombia");
+  dial.client("diego");
+  dial.client("colombia");
 
   res.type("text/xml");
   res.send(twiml.toString());
