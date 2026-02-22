@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Agent Dashboard</title>
+  <script src="/twilio.min.js"></script>
+</head>
+<body style="font-family: Arial; padding: 40px;">
+
+<h2>Agent Login</h2>
+
+<select id="identity">
+  <option value="diego">Diego</option>
+  <option value="colombia">Colombia</option>
+</select>
+
+<button onclick="goOnline()">Go Online</button>
+
+<p id="status"></p>
+
+<script>
+let device;
+
+async function goOnline() {
+
+  const identity = document.getElementById("identity").value;
+
+  const response = await fetch("/token?identity=" + identity);
+  const data = await response.json();
+
+  device = new Twilio.Device(data.token);
+
+  device.on("registered", () => {
+    document.getElementById("status").innerText =
+      identity + " is ONLINE";
+  });
+
+  device.on("incoming", call => {
+
+    if (confirm("Incoming website call. Accept?")) {
+      call.accept();
+    } else {
+      call.reject();
+    }
+
+  });
+
+  device.on("error", err => {
+    console.error(err);
+  });
+
+  device.register();
+}
+</script>
+
+</body>
+</html>

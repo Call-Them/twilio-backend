@@ -14,7 +14,8 @@ const VoiceGrant = AccessToken.VoiceGrant;
 
 /* TOKEN ROUTE */
 app.get("/token", (req, res) => {
-  const identity = "customer";
+
+  const identity = req.query.identity;
 
   const token = new AccessToken(
     process.env.TWILIO_ACCOUNT_SID,
@@ -25,29 +26,23 @@ app.get("/token", (req, res) => {
 
   const voiceGrant = new VoiceGrant({
     outgoingApplicationSid: process.env.TWILIO_TWIML_APP_SID,
-    incomingAllow: true,
+    incomingAllow: true
   });
 
   token.addGrant(voiceGrant);
+
   res.json({ token: token.toJwt() });
 });
-
 /* VOICE ROUTE */
 app.post("/voice", (req, res) => {
 
   const VoiceResponse = require("twilio").twiml.VoiceResponse;
   const twiml = new VoiceResponse();
 
-  const dial = twiml.dial({
-    callerId: process.env.TWILIO_PHONE_NUMBER,
-    timeout: 20
-  });
+  const dial = twiml.dial();
 
-  // Your phone (US)
-  dial.number("+19413828380");
-
-  // Friend in Colombia
-  dial.number("+573197753531");
+  dial.client("diego");
+  dial.client("colombia");
 
   res.type("text/xml");
   res.send(twiml.toString());
