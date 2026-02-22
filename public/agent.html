@@ -17,6 +17,8 @@
 
   <p id="status">Offline</p>
 
+  <div id="callControls"></div>
+
   <script>
     let device;
 
@@ -42,17 +44,49 @@
         });
 
         device.on("incoming", call => {
+
           console.log("Incoming call");
-          call.accept();
+          document.getElementById("status").innerText = "Incoming call...";
+
+          const controls = document.getElementById("callControls");
+          controls.innerHTML = "";
+
+          const acceptBtn = document.createElement("button");
+          acceptBtn.innerText = "Accept";
+
+          const declineBtn = document.createElement("button");
+          declineBtn.innerText = "Decline";
+
+          controls.appendChild(acceptBtn);
+          controls.appendChild(declineBtn);
+
+          acceptBtn.onclick = () => {
+            call.accept();
+            document.getElementById("status").innerText = "On Call";
+            controls.innerHTML = "";
+          };
+
+          declineBtn.onclick = () => {
+            call.reject();
+            document.getElementById("status").innerText = "Call Declined";
+            controls.innerHTML = "";
+          };
+
+          call.on("disconnect", () => {
+            document.getElementById("status").innerText = "Online";
+            controls.innerHTML = "";
+          });
+
         });
 
-        // 🔥 REQUIRED IN SDK v2
+        // REQUIRED for SDK v2
         device.register();
 
       } catch (err) {
         console.error("Setup error:", err);
       }
     });
+
   </script>
 
 </body>
