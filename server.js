@@ -33,6 +33,8 @@ app.get("/token", (req, res) => {
 
   res.json({ token: token.toJwt() });
 });
+
+
 /* VOICE ROUTE */
 app.post("/voice", (req, res) => {
 
